@@ -8,7 +8,8 @@ class App extends Component {
     this.state = {
       recentURL: 'https://fcctop100.herokuapp.com/api/fccusers/top/recent',
       topURL: 'https://fcctop100.herokuapp.com/api/fccusers/top/alltime',
-      leaderboard: [],
+      recentLeaderboard: [],
+      topLeaderboard: [],
       recentActive: true,
       topActive: false,
       decending: true,
@@ -17,23 +18,33 @@ class App extends Component {
 
   handleClick(e) {
     const isInactive = e.target.className.indexOf('active') === -1
-    const thisKey = e.target.innerText === 'Recent' ? "recentActive" : "topActive"
-    const otherKey = e.target.innerText === 'Recent' ? "topActive" : "recentActive"
-    const newLeaderboardURL = e.target.innerText === 'Recent' ? this.state.recentURL : this.state.topURL
+    const thisButtonKey = e.target.innerText === 'Recent' ? 'recentActive' : 'topActive'
+    const otherButtonKey = e.target.innerText === 'Recent' ? 'topActive' : 'recentActive'
+    const decending = this.state.decending
+    const currentLeaderboard = this.state.recentActive ? this.state.recentLeaderboard : this.state.topLeaderboard
 
-    if (isInactive) {
-      this.fetchLeaderboard(newLeaderboardURL)
-      .then(result => this.setState({
-        leaderboard: result,
-        [thisKey]: true,
-        [otherKey]: false,
+    if (isInactive && decending) { // ex: displaying recent scores in decending order and click top score
+      this.setState({
+        [thisButtonKey]: true,
+        [otherButtonKey]: false,
         decending: true
-      }))
-    } else if (!isInactive) {
-      const outputLeaderboard = this.state.leaderboard.reverse()
+      })
+    } else if (isInactive && !decending) { // ex: displaying recent scores in ascending order and click top score
+      // reverse whatever the current leaderboard is (in this ex, the recent
+      // scores leaderboard) so that it's back to default decending order
+      currentLeaderboard.reverse()
 
       this.setState({
-        leaderboard: outputLeaderboard,
+        [thisButtonKey]: true,
+        [otherButtonKey]: false,
+        decending: true
+      })
+    } else if (!isInactive) { // ex: displaying recent scores and click recent scores button again
+      // reverse whatever the current leaderboard is (in this ex, the recent
+      // scores leaderboard) to display it in ascending or decending order
+      currentLeaderboard.reverse()
+
+      this.setState({
         decending: this.state.decending ? false : true
       })
     }
@@ -54,62 +65,35 @@ class App extends Component {
     }
   }
 
-  // renderScoreboard() {
-  //   const outputArr = this.state.recentActive ? this.state.recentLeaderboard : this.state.topLeaderboard
-  //   const decending = this.state.decending
-  //   const recent = this.state.recentActive
-  //   // console.log(outputArr, decending)
-  //   let output = []
-  //
-  //   outputArr.forEach(function(obj, index) {
-  //     const rank = index + 1 // due to 0 index
-  //     const score = recent ? obj.recent : obj.alltime
-  //     const avatar = obj.img
-  //     const username = obj.username
-  //     output += "<div className='score " + rank + "'>"
-  //     output += "<a href='https://www.freecodecamp.org/" + username + "'>"
-  //     output += "<div className='rank'>"
-  //     output += "<p>1</p></div>"
-  //     output += "<div className='avatar'>"
-  //     output += "<img scr='" + avatar + "' alt='" + username + "'s avatar'/></div>"
-  //     output += "<div className='username'>"
-  //     output += "<p>" + username + "</p></div>"
-  //     output += "<div className='points'>"
-  //     output += "<p>" + score + "</p></div>"
-  //     output += "</a></div>"
-  //     if (rank !== 100) {
-  //       output += "<hr />"
-  //     }
-  //   })
-  //
-  //   return output
-  // }
+  componentDidMount() {
+    // fetch the recent scores for the initial page load
+    // note: need to use arrow functions below to avoid undefined error
 
-  fetchLeaderboard(URL) {
-    return fetch(URL, {
+    fetch(this.state.recentURL, {
       method: 'get'
     }).then((res) => {
       return res.json()
     }).then((data) => {
-      // this.setState({ leaderboard: data })
-      return data
+      this.setState({ recentLeaderboard: data })
     }).catch((err) => {
       console.log(err)
     })
-  }
 
-  componentDidMount() {
-    // fetch the recent scores for the initial page load
-    // note: need to use arrow functions below to avoid undefined error
-    // also, need to resolve promise here with new fetchLeaderboard function
-    this.fetchLeaderboard(this.state.recentURL)
-    .then(result => this.setState({
-      leaderboard: result
-    }))
+    // also fetch top scores here, too
+    fetch(this.state.topURL, {
+      method: 'get'
+    }).then((res) => {
+      return res.json()
+    }).then((data) => {
+      this.setState({ topLeaderboard: data })
+    }).catch((err) => {
+      console.log(err)
+    })
   } // end componentDidMount
 
   render() {
     const recent = this.state.recentActive
+    const targetLeaderboard = recent ? this.state.recentLeaderboard : this.state.topLeaderboard
 
     return (
       <div className="App">
@@ -130,7 +114,7 @@ class App extends Component {
         </div>
         {/* end button-bar */}
         <div className="scoreboard">
-          {this.state.leaderboard.map(function(obj, index) {
+          {targetLeaderboard.map(function(obj, index) {
             const points = recent ? obj.recent : obj.alltime
             return (
               <div className="score-container" key={index}>
