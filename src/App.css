@@ -83,6 +83,7 @@ span {
   align-items: center;
   grid-area: rank;
   font-weight: bold;
+  font-size: 1.1em;
 }
 
 .avatar {
@@ -109,7 +110,7 @@ span {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 1.2em;
+  font-size: 1.15em;
   font-weight: bold;
   grid-area: points;
 }
@@ -134,7 +135,7 @@ hr {
 .footer {
   background-color: #006400;
   height: 50px;
-  margin-top: 6px; /* to replace margin from missing last hr element */
+  margin-top: 30px; /* to replace margin from missing last hr element */
 }
 
 @media (min-width: 760px) {
@@ -144,7 +145,7 @@ hr {
   }
 
   p {
-    font-size: 1.15em;
+    font-size: 1.1em;
   }
 
   .avatar img {
