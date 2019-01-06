@@ -1,4 +1,4 @@
-Created as the second of the FreeCodeCamp React projects.
+Created as the second of the freeCodeCamp React projects.
 
 This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
 
